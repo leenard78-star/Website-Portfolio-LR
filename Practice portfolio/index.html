@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Community Connect – Report a problem in your neighborhood</title>
+  <meta name="description" content="Report broken lights, garbage, flooding, safety concerns and more. Community Connect sends your report to the people who can fix it.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+/* ---------- Tokens ---------- */
+:root {
+  --teal: #0d4a5a;
+  --teal-dark: #093643;
+  --yellow: #ffc933;
+  --yellow-dark: #e8b21c;
+  --bg: #f3f7f7;
+  --white: #ffffff;
+  --ink: #14262c;
+  --muted: #4f6168;
+  --line: #d3dedf;
+
+  --new-bg: #e6eef0;      --new-ink: #24444d;
+  --progress-bg: #ffecb8; --progress-ink: #6b4a00;
+  --done-bg: #cdeedb;     --done-ink: #14573a;
+
+  --font: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --max: 68rem;
+  --pad: clamp(1.25rem, 5vw, 3rem);
+  --radius: 0.75rem;
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 1rem; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+h1, h2, h3 { line-height: 1.15; margin: 0; }
+p { margin: 0 0 1rem; max-width: 62ch; }
+a { color: inherit; }
+
+:focus-visible {
+  outline: 3px solid var(--yellow-dark);
+  outline-offset: 3px;
+}
+
+.site-header, .site-footer,
+main > section > * {
+  width: min(100% - 2 * var(--pad), var(--max));
+  margin-inline: auto;
+}
+
+/* ---------- Header ---------- */
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-block: 1.25rem;
+}
+
+.logo { font-weight: 700; font-size: 1.2rem; text-decoration: none; color: var(--teal); }
+
+.site-header nav { display: flex; align-items: center; flex-wrap: wrap; gap: 1.25rem; }
+.site-header nav a { text-decoration: none; }
+.site-header nav a:hover { text-decoration: underline; }
+
+.nav-button {
+  background: var(--teal);
+  color: var(--white);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.nav-button:hover { background: var(--teal-dark); text-decoration: none !important; }
+
+/* ---------- Buttons ---------- */
+.button {
+  display: inline-block;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  background: var(--yellow);
+  color: var(--ink);
+  padding: 0.85rem 1.6rem;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.button:hover { background: var(--yellow-dark); }
+
+.button-light {
+  background: transparent;
+  color: var(--white);
+  box-shadow: inset 0 0 0 2px var(--white);
+}
+.button-light:hover { background: rgba(255, 255, 255, 0.15); }
+
+/* ---------- Hero ---------- */
+.hero {
+  background: var(--teal);
+  color: var(--white);
+  padding-block: clamp(3rem, 9vw, 6rem);
+}
+
+.hero h1 {
+  font-size: clamp(2.25rem, 6.5vw, 4.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  max-width: 17ch;
+  margin-bottom: 1.25rem;
+}
+
+.lead { font-size: clamp(1.1rem, 2.2vw, 1.3rem); color: #d6e6ea; margin-bottom: 2rem; }
+
+.hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+/* ---------- Section spacing ---------- */
+.how, .report, .recent { padding-block: clamp(2.5rem, 6vw, 4.5rem); }
+
+h2 {
+  font-size: clamp(1.7rem, 3.5vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.5rem;
+}
+
+/* ---------- How it works ---------- */
+.steps {
+  list-style: none;
+  counter-reset: step;
+  margin-block: 0;
+  padding-block: 0;
+  padding-inline: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1.5rem;
+}
+
+.steps li {
+  counter-increment: step;
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  padding: 1.5rem;
+}
+
+.steps li::before {
+  content: counter(step);
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  background: var(--yellow);
+  font-weight: 700;
+}
+
+.steps h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+.steps p { margin: 0; color: var(--muted); }
+
+/* ---------- Report form ---------- */
+main > .report {
+  background: var(--white);
+  border-block: 1px solid var(--line);
+}
+
+.report {
+  display: grid;
+}
+main > .report > * { grid-column: 1; }
+
+@media (min-width: 62rem) {
+  main > .report {
+    grid-template-columns: 1fr min(var(--max), 100% - 2 * var(--pad)) 1fr;
+  }
+  main > .report > * { grid-column: 2; }
+  main > .report .report-intro {
+    width: 100%;
+  }
+}
+
+.report-intro p { color: var(--muted); }
+
+.emergency {
+  background: #fde8e8;
+  color: #7a1a1a !important;
+  border-left: 5px solid #d33;
+  padding: 0.75rem 1rem;
+  border-radius: 0.4rem;
+}
+
+.form { display: grid; gap: 1.25rem; margin-top: 1.5rem; max-width: 40rem; }
+
+.field { display: grid; gap: 0.4rem; border: 0; padding: 0; margin: 0; min-width: 0; }
+
+label, legend { font-weight: 700; }
+
+input[type="text"], select, textarea, input[type="file"] {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: var(--white);
+  border: 2px solid var(--line);
+  border-radius: 0.5rem;
+  padding: 0.7rem 0.85rem;
+}
+
+input[type="text"]:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(13, 74, 90, 0.2);
+}
+
+textarea { resize: vertical; }
+
+.field-row { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+
+.choices { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin-top: 0.4rem; }
+.choices label { font-weight: 400; display: flex; align-items: center; gap: 0.5rem; }
+.choices input { width: 1.15rem; height: 1.15rem; accent-color: var(--teal); }
+
+.form .button { justify-self: start; }
+
+/* ---------- Recent reports ---------- */
+.reports { list-style: none; margin-block: 0; padding-inline: 0; display: grid; gap: 1rem; }
+
+.reports li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+}
+
+.report-main h3 { font-size: 1.2rem; margin-bottom: 0.35rem; }
+.report-main p { margin: 0; color: var(--muted); }
+
+.report-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; flex-shrink: 0; }
+.when { font-size: 0.9rem; color: var(--muted); }
+
+.status {
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.status-new { background: var(--new-bg); color: var(--new-ink); }
+.status-progress { background: var(--progress-bg); color: var(--progress-ink); }
+.status-done { background: var(--done-bg); color: var(--done-ink); }
+
+/* ---------- Footer ---------- */
+.site-footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-block: 2rem 3rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.site-footer p { margin: 0; }
+
+/* ---------- Small screens ---------- */
+@media (max-width: 40rem) {
+  .reports li { flex-direction: column; gap: 0.75rem; }
+  .report-meta { flex-direction: row; align-items: center; justify-content: space-between; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}
+
+/* ---------- Added with JavaScript: messages, filters, extras ---------- */
+.form-message { margin: 0; font-weight: 700; min-height: 1.6em; }
+.form-message.is-success { color: var(--done-ink); }
+.form-message.is-error { color: #a31d1d; }
+
+[aria-invalid="true"] { border-color: #d33 !important; background: #fff6f6; }
+
+button:disabled { opacity: 0.6; cursor: wait; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem; }
+
+.filter {
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--white);
+  color: var(--ink);
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.filter:hover { border-color: var(--teal); }
+.filter.is-active { background: var(--teal); border-color: var(--teal); color: var(--white); }
+
+.status-urgent { background: #fde8e8; color: #7a1a1a; }
+
+.report-photo {
+  display: block;
+  max-width: 14rem;
+  width: 100%;
+  margin-top: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--line);
+}
+
+.empty { color: var(--muted); }
+
+.link-button {
+  margin-top: 1.5rem;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-button:hover { color: var(--ink); }
+
+</style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a class="logo" href="#top">Community Connect</a>
+    <nav aria-label="Main">
+      <a href="#how">How it works</a>
+      <a href="#recent">Recent reports</a>
+      <a class="nav-button" href="#report">Report a problem</a>
+    </nav>
+  </header>
+
+  <main id="top">
+
+    <section class="hero">
+      <h1>See something that needs fixing? Tell us.</h1>
+      <p class="lead">Broken streetlights, uncollected garbage, flooding, unsafe roads. Send a report in two minutes and follow it until it’s resolved.</p>
+      <div class="hero-actions">
+        <a class="button" href="#report">Report a problem</a>
+        <a class="button button-light" href="#recent">See recent reports</a>
+      </div>
+    </section>
+
+    <section id="how" class="how">
+      <h2>How it works</h2>
+      <ol class="steps">
+        <li>
+          <h3>You send a report</h3>
+          <p>Describe the problem and where it is. A photo helps, but isn’t required.</p>
+        </li>
+        <li>
+          <h3>We check and pass it on</h3>
+          <p>Volunteers review each report and send it to the barangay office or the right service.</p>
+        </li>
+        <li>
+          <h3>You see the result</h3>
+          <p>Every report shows a status: Received, In progress, or Resolved.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section id="report" class="report">
+      <div class="report-intro">
+        <h2>Report a problem</h2>
+        <p>Fields marked with * are required. Your contact details are only used to follow up on your report.</p>
+        <p class="emergency"><strong>In an emergency, call 911</strong> or your local emergency hotline. Do not use this form.</p>
+      </div>
+
+      <form class="form" id="report-form" novalidate>
+
+        <div class="field">
+          <label for="category">What kind of problem is it? *</label>
+          <select id="category" name="category" required>
+            <option value="">Choose a category</option>
+            <option>Broken streetlight</option>
+            <option>Garbage or illegal dumping</option>
+            <option>Flooding or drainage</option>
+            <option>Road damage</option>
+            <option>Safety concern</option>
+            <option>Noise or disturbance</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="location">Where is it? *</label>
+          <input id="location" name="location" type="text" placeholder="Street, landmark, or barangay" required>
+        </div>
+
+        <div class="field">
+          <label for="details">What happened? *</label>
+          <textarea id="details" name="details" rows="5" placeholder="Describe the problem and how long it has been there" required></textarea>
+        </div>
+
+        <fieldset class="field">
+          <legend>How urgent is it?</legend>
+          <div class="choices">
+            <label><input type="radio" name="urgency" value="Low" checked> Can wait</label>
+            <label><input type="radio" name="urgency" value="Medium"> Needs attention soon</label>
+            <label><input type="radio" name="urgency" value="High"> Dangerous</label>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="photo">Add a photo (optional)</label>
+          <input id="photo" name="photo" type="file" accept="image/*">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="name">Your name (optional)</label>
+            <input id="name" name="name" type="text" autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="contact">Phone or email (optional)</label>
+            <input id="contact" name="contact" type="text" autocomplete="email">
+          </div>
+        </div>
+
+        <button class="button" type="submit">Send report</button>
+        <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section id="recent" class="recent">
+      <h2>Recent reports</h2>
+      <div class="filters" role="group" aria-label="Filter reports by status">
+        <button type="button" class="filter is-active" data-filter="All" aria-pressed="true">All</button>
+        <button type="button" class="filter" data-filter="Received" aria-pressed="false">Received</button>
+        <button type="button" class="filter" data-filter="In progress" aria-pressed="false">In progress</button>
+        <button type="button" class="filter" data-filter="Resolved" aria-pressed="false">Resolved</button>
+      </div>
+      <ul class="reports" id="report-list"></ul>
+      <p class="empty" id="empty-state" hidden>No reports with this status yet.</p>
+      <button type="button" class="link-button" id="clear-reports">Clear all reports on this device</button>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 Community Connect. Made by neighbors, for neighbors.</p>
+    <a href="#top">Back to top</a>
+  </footer>
+
+  <script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "community-connect-reports";
+  var HOUR = 3600 * 1000;
+  var DAY = 24 * HOUR;
+
+  var form = document.getElementById("report-form");
+  var message = document.getElementById("form-message");
+  var list = document.getElementById("report-list");
+  var emptyState = document.getElementById("empty-state");
+  var clearButton = document.getElementById("clear-reports");
+  var filterButtons = document.querySelectorAll(".filter");
+
+  var activeFilter = "All";
+
+  /* ---------- Sample reports (shown until the first real one is saved) ---------- */
+  function sampleReports() {
+    var now = Date.now();
+    return [
+      {
+        id: "S-1",
+        category: "Broken streetlight",
+        location: "Rizal Street",
+        details: "The light near the corner store has been off for a week. The street is very dark at night.",
+        urgency: "Medium",
+        status: "In progress",
+        created: now - 2 * DAY
+      },
+      {
+        id: "S-2",
+        category: "Garbage or illegal dumping",
+        location: "Beside the market",
+        details: "Uncollected garbage is blocking part of the sidewalk and attracting flies.",
+        urgency: "Medium",
+        status: "Received",
+        created: now - 1 * DAY
+      },
+      {
+        id: "S-3",
+        category: "Flooding or drainage",
+        location: "Near the school",
+        details: "Water collects on the road after every rain. Cleared by the barangay crew.",
+        urgency: "Low",
+        status: "Resolved",
+        created: now - 5 * DAY
+      }
+    ];
+  }
+
+  /* ---------- Storage ---------- */
+  function loadReports() {
+    try {
+      var saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (e) { /* storage unavailable or corrupted: fall back to samples */ }
+    return sampleReports();
+  }
+
+  function saveReports(reports) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  var reports = loadReports();
+
+  /* ---------- Helpers ---------- */
+  function timeAgo(timestamp) {
+    var diff = Date.now() - timestamp;
+    if (diff < HOUR) return "Just now";
+    if (diff < DAY) {
+      var h = Math.floor(diff / HOUR);
+      return h + (h === 1 ? " hour ago" : " hours ago");
+    }
+    var d = Math.floor(diff / DAY);
+    if (d === 1) return "Yesterday";
+    return d + " days ago";
+  }
+
+  function statusClass(status) {
+    if (status === "Resolved") return "status-done";
+    if (status === "In progress") return "status-progress";
+    return "status-new";
+  }
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text; // textContent keeps user input safe
+    return node;
+  }
+
+  /* ---------- Rendering ---------- */
+  function render() {
+    list.innerHTML = "";
+
+    var visible = reports
+      .filter(function (r) { return activeFilter === "All" || r.status === activeFilter; })
+      .sort(function (a, b) { return b.created - a.created; });
+
+    visible.forEach(function (r) {
+      var item = el("li");
+
+      var main = el("div", "report-main");
+      main.appendChild(el("h3", "", r.category + " – " + r.location));
+      main.appendChild(el("p", "", r.details));
+      if (r.photo) {
+        var img = el("img", "report-photo");
+        img.src = r.photo;
+        img.alt = "Photo attached to the report";
+        main.appendChild(img);
+      }
+
+      var meta = el("div", "report-meta");
+      meta.appendChild(el("span", "status " + statusClass(r.status), r.status));
+      if (r.urgency === "High") meta.appendChild(el("span", "status status-urgent", "Dangerous"));
+      meta.appendChild(el("span", "when", timeAgo(r.created)));
+
+      item.appendChild(main);
+      item.appendChild(meta);
+      list.appendChild(item);
+    });
+
+    emptyState.hidden = visible.length > 0;
+  }
+
+  /* ---------- Filters ---------- */
+  filterButtons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      activeFilter = button.getAttribute("data-filter");
+      filterButtons.forEach(function (b) {
+        var on = b === button;
+        b.classList.toggle("is-active", on);
+        b.setAttribute("aria-pressed", String(on));
+      });
+      render();
+    });
+  });
+
+  /* ---------- Photo: shrink before saving so storage doesn't fill up ---------- */
+  function readPhoto(file) {
+    return new Promise(function (resolve) {
+      if (!file || !file.type.startsWith("image/")) return resolve("");
+      var reader = new FileReader();
+      reader.onerror = function () { resolve(""); };
+      reader.onload = function () {
+        var img = new Image();
+        img.onerror = function () { resolve(""); };
+        img.onload = function () {
+          var max = 480;
+          var scale = Math.min(1, max / Math.max(img.width, img.height));
+          var canvas = document.createElement("canvas");
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", 0.7));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /* ---------- Form ---------- */
+  function showMessage(text, isError) {
+    message.textContent = text;
+    message.className = "form-message " + (isError ? "is-error" : "is-success");
+  }
+
+  function clearErrors() {
+    form.querySelectorAll("[aria-invalid]").forEach(function (f) { f.removeAttribute("aria-invalid"); });
+  }
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    clearErrors();
+
+    var data = {
+      category: form.category.value.trim(),
+      location: form.location.value.trim(),
+      details: form.details.value.trim()
+    };
+
+    // Required fields: category, location, details (whitespace-only counts as empty)
+    var labels = { category: "category", location: "location", details: "description" };
+    var missing = Object.keys(data).filter(function (key) { return !data[key]; });
+
+    if (missing.length) {
+      missing.forEach(function (key) { form[key].setAttribute("aria-invalid", "true"); });
+      form[missing[0]].focus();
+      showMessage("Please fill in the " + missing.map(function (k) { return labels[k]; }).join(", ") + ".", true);
+      return;
+    }
+
+    var submitButton = form.querySelector("button[type='submit']");
+    submitButton.disabled = true;
+    submitButton.textContent = "Sending…";
+
+    readPhoto(form.photo.files[0]).then(function (photo) {
+      var urgency = form.urgency.value;
+      var report = {
+        id: "R-" + Date.now().toString(36).toUpperCase(),
+        category: data.category,
+        location: data.location,
+        details: data.details,
+        urgency: urgency,
+        status: "Received",
+        created: Date.now(),
+        photo: photo
+      };
+
+      reports.push(report);
+      var saved = saveReports(reports);
+
+      activeFilter = "All";
+      filterButtons.forEach(function (b) {
+        var on = b.getAttribute("data-filter") === "All";
+        b.classList.toggle("is-active", on);
+        b.setAttribute("aria-pressed", String(on));
+      });
+      render();
+
+      form.reset();
+      submitButton.disabled = false;
+      submitButton.textContent = "Send report";
+
+      showMessage(
+        saved
+          ? "Report sent. Your reference number is " + report.id + "."
+          : "Report added, but it could not be saved on this device and will disappear when you close the page.",
+        !saved
+      );
+
+      document.getElementById("recent").scrollIntoView({ behavior: "smooth" });
+    });
+  });
+
+  /* ---------- Clear (two clicks instead of a pop-up, which some previews block) ---------- */
+  var clearTimer = null;
+  var clearLabel = clearButton.textContent;
+
+  clearButton.addEventListener("click", function () {
+    if (!clearTimer) {
+      clearButton.textContent = "Click again to remove all reports";
+      clearTimer = setTimeout(function () {
+        clearButton.textContent = clearLabel;
+        clearTimer = null;
+      }, 4000);
+      return;
+    }
+    clearTimeout(clearTimer);
+    clearTimer = null;
+    clearButton.textContent = clearLabel;
+    reports = [];
+    saveReports(reports);
+    render();
+  });
+
+  render();
+})();
+
+</script>
+</body>
+</html>

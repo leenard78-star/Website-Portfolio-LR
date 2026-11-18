@@ -1,0 +1,18 @@
+﻿{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "omniroute/openrouter/auto",
+  "provider": {
+    "omniroute": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "OmniRoute (local gateway)",
+      "options": {
+        "baseURL": "http://localhost:20128/v1",
+        "apiKey": "sk-0d99210d992472b4-b5ee85-86969421"
+      },
+      "models": {
+        "openrouter/auto": { "name": "OpenRouter Auto" },
+        "anthropic/claude-3.5-sonnet": { "name": "Claude 3.5 Sonnet (via OpenRouter)" }
+      }
+    }
+  }
+}

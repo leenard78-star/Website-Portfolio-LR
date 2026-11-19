@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="PK's Resort front-desk ledger for person schedules, rate tiers, downpayments and payment status.">
+  <title>PK's Resort — Front Desk Ledger</title>
+  <link rel="icon" type="image/jpeg" href="/assets/pk-logo.jpg">
+  <link rel="apple-touch-icon" href="/assets/pk-logo.jpg">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#booklet">Skip to the schedule booklet</a>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="logo-frame">
+          <img class="brand-logo" src="/assets/pk-logo.jpg" width="64" height="64" alt="PK's Resort logo">
+          <span class="brand-mark" id="logoFallback" hidden>PK</span>
+        </span>
+        <div class="brand-copy">
+          <p class="desk-mark">Front desk / Schedule ledger</p>
+          <h1>PK's Resort</h1>
+          <p class="owner-line">PK's Resort — Owned & Managed by the Bennun Family</p>
+        </div>
+      </div>
+      <div class="header-meta">
+        <span class="desk-location">PHP / Philippine pesos</span>
+        <span class="db-status" id="dbStatus">Checking PostgreSQL</span>
+      </div>
+    </div>
+    <div class="resort-strip" aria-label="Resort information">
+      <div class="resort-fact">
+        <span class="fact-label">Desk hours</span>
+        <strong>Check-in: 1:00 PM / Check-out: 11:00 AM</strong>
+      </div>
+      <div class="resort-fact">
+        <span class="fact-label">Exclusive events</span>
+        <strong>5-Hour Event Window</strong>
+      </div>
+      <div class="resort-fact">
+        <span class="fact-label">Payment terms</span>
+        <strong>Downpayments tracked in PHP</strong>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <div class="setup-hint" id="setupHint" hidden>
+      <strong>Database not connected.</strong>
+      Set <code>DB_PASSWORD</code> in <code>.env</code>, create the database with
+      <code>createdb -U postgres pks_resort</code>, load <code>schema_and_seed.sql</code>,
+      then restart the server.
+    </div>
+
+    <section class="desk-strip summary-strip" aria-label="Payment summary">
+      <div class="strip-item">
+        <span class="strip-label">Bookings on file</span>
+        <strong id="statBookings">0</strong>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">Awaiting balance</span>
+        <strong id="statUnpaid">0</strong>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">Upcoming arrivals</span>
+        <strong id="statUpcoming">0</strong>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">Total Estimate</span>
+        <strong id="statTotal">₱0</strong>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">Downpayment Paid</span>
+        <strong id="statDownpayment">₱0</strong>
+      </div>
+      <div class="strip-item strip-money">
+        <span class="strip-label">Remaining Balance</span>
+        <strong id="statRemaining">₱0</strong>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <aside class="entry-rail" aria-label="Desk entry forms">
+        <section class="entry-block">
+          <div class="block-head">
+            <h2>Person</h2>
+            <p>Add a person to the ledger.</p>
+          </div>
+          <form id="customerForm" class="form-grid" novalidate>
+            <label class="field full">Full name
+              <input name="fullName" type="text" maxlength="100" placeholder="e.g. Juan Dela Cruz" autocomplete="name" required>
+            </label>
+            <label class="field full">Email
+              <input name="email" type="email" maxlength="180" placeholder="name@example.com" autocomplete="email" required>
+            </label>
+            <label class="field full">Philippine mobile
+              <input name="phone" type="tel" maxlength="20" placeholder="+63 963 464 2360" autocomplete="tel" required>
+            </label>
+            <label class="field full">Address (optional)
+              <input name="address" type="text" maxlength="200" placeholder="7 Banyan Road, Batangas City" autocomplete="street-address">
+            </label>
+            <button class="button primary full" type="submit">Save person</button>
+          </form>
+        </section>
+
+        <section class="entry-block">
+          <div class="block-head">
+            <h2>Booking</h2>
+            <p>Choose a rate tier, dates and downpayment.</p>
+          </div>
+          <form id="scheduleForm" class="form-grid" novalidate>
+            <label class="field full">Person
+              <select name="customerId" id="customerSelect" required>
+                <option value="">Loading persons...</option>
+              </select>
+            </label>
+            <label class="field full">Accommodation / rate tier
+              <select name="rateTierId" id="accommodationSelect" required>
+                <option value="">Loading accommodations...</option>
+              </select>
+            </label>
+            <p class="field-help full" id="rateHint" aria-live="polite">Room rates: ₱1,499/night up to 2 persons or ₱3,499/night up to 7 persons. Exclusive event: ₱9,000 flat.</p>
+            <label class="field">Check-in
+              <input name="checkInDate" id="checkInDate" type="date" required>
+            </label>
+            <label class="field">Check-out
+              <input name="checkOutDate" id="checkOutDate" type="date" required>
+            </label>
+            <p class="field-help full" id="dateHint" aria-live="polite">Mon, 2026-11-02 → Thu, 2026-11-05</p>
+            <label class="field">Persons
+              <input name="personCount" id="personCount" type="number" min="1" max="7" value="2" required>
+            </label>
+            <label class="field">Downpayment (₱)
+              <input name="downpaymentAmount" id="downpaymentAmount" type="number" min="0" max="1000000" step="1" value="0" required>
+            </label>
+            <p class="field-help full" id="balanceHint" aria-live="polite">Total estimate ₱0 · Downpayment ₱0 · Remaining ₱0</p>
+            <label class="field full">Payment status
+              <select name="paymentStatus" id="paymentStatus" required>
+                <option value="UNPAID">UNPAID</option>
+                <option value="DOWNPAYMENT">DOWNPAYMENT</option>
+                <option value="PAID">PAID</option>
+              </select>
+            </label>
+            <label class="field full">Notes (optional)
+              <textarea name="notes" rows="2" maxlength="500" placeholder="Special requests, payment reminder..."></textarea>
+            </label>
+            <button class="button primary full" type="submit">Create booking</button>
+          </form>
+        </section>
+      </aside>
+
+      <section class="ledger" id="booklet" aria-label="Schedule booklet">
+        <div class="ledger-head">
+          <div class="ledger-title">
+            <h2>Schedule booklet</h2>
+            <p id="resultCount" aria-live="polite">Loading schedules...</p>
+          </div>
+          <div class="filters" role="group" aria-label="Filter schedules">
+            <label class="filter-field person-search">Search all persons
+              <input id="personSearch" type="search" placeholder="Search all persons by name or phone..." autocomplete="off" aria-describedby="searchHelp">
+            </label>
+            <label class="filter-field">Status
+              <select id="filterStatus" aria-label="Filter by payment status">
+                <option value="">All payments</option>
+                <option value="UNPAID">UNPAID</option>
+                <option value="DOWNPAYMENT">DOWNPAYMENT</option>
+                <option value="PAID">PAID</option>
+              </select>
+            </label>
+            <label class="filter-field">Person
+              <select id="filterCustomer" aria-label="Filter by person">
+                <option value="">All persons</option>
+              </select>
+            </label>
+            <label class="filter-field">From
+              <input id="filterFrom" type="date" aria-label="Check-in from">
+            </label>
+            <label class="filter-field">To
+              <input id="filterTo" type="date" aria-label="Check-in to">
+            </label>
+            <button class="button ghost" type="button" id="resetFilters">Reset</button>
+            <p class="filter-help" id="searchHelp">Type a name or phone to narrow the booklet instantly.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Person</th>
+                <th scope="col">Accommodation / tier</th>
+                <th scope="col">Dates</th>
+                <th scope="col">Persons / nights</th>
+                <th scope="col">Total Estimate</th>
+                <th scope="col">Downpayment Paid</th>
+                <th scope="col">Remaining Balance</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleRows">
+              <tr><td colspan="9" class="empty">Loading schedules...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pager">
+          <button class="button ghost" type="button" id="prevPage">Previous</button>
+          <span id="pageLabel">Page 1</span>
+          <button class="button ghost" type="button" id="nextPage">Next</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <span>PK's Resort — Owned & Managed by the Bennun Family</span>
+    <span>Check-in: 1:00 PM / Check-out: 11:00 AM · 5-Hour Event Window</span>
+  </footer>
+
+  <dialog id="editDialog">
+    <form id="editForm" class="form-grid" method="dialog">
+      <div class="dialog-head">
+        <h2>Amend booking <span id="editIdLabel"></span></h2>
+        <p>Update dates, persons, downpayment, status or notes.</p>
+      </div>
+      <p class="field-help full" id="editEstimate">Total estimate ₱0</p>
+      <label class="field">Check-in
+        <input name="checkInDate" id="editCheckIn" type="date" required>
+      </label>
+      <label class="field">Check-out
+        <input name="checkOutDate" id="editCheckOut" type="date" required>
+      </label>
+      <label class="field">Persons
+        <input name="personCount" id="editPersons" type="number" min="1" max="7" required>
+      </label>
+      <label class="field">Downpayment (₱)
+        <input name="downpaymentAmount" id="editDownpayment" type="number" min="0" max="1000000" step="1" required>
+      </label>
+      <label class="field full">Payment status
+        <select name="paymentStatus" id="editPaymentStatus" required>
+          <option value="UNPAID">UNPAID</option>
+          <option value="DOWNPAYMENT">DOWNPAYMENT</option>
+          <option value="PAID">PAID</option>
+        </select>
+      </label>
+      <label class="field full">Notes
+        <textarea name="notes" rows="3" maxlength="500"></textarea>
+      </label>
+      <div class="dialog-actions full">
+        <button class="button ghost" type="button" id="cancelEdit">Cancel</button>
+        <button class="button primary" type="submit">Save changes</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
